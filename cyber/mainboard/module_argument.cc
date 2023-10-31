@@ -62,11 +62,20 @@ void ModuleArgument::ParseArgument(const int argc, char* const argv[]) {
 }
 
 void ModuleArgument::GetOptions(const int argc, char* const argv[]) {
-  opterr = 0;  // extern int opterr
-  int long_index = 0;
-  const std::string short_opts = "hd:p:s:";
+  //  解析命令行参数
+  //  参数optarg：指向当前选项参数的指针
+  //  参数optind：再次调用getopt时的下一个argv指针索引
+  //  参数optopt：表示最后一个未知选项
+  //  参数optstring: 比如getopt(argc, argv, "td:ch:q::")
+
+  opterr = 0;  // extern int opterr  全局变量 默认为1 为0表示关闭输出到stderr,但可能会返回"?"
+  int long_index = 0; // 长选项的索引  从0开始
+  const std::string short_opts = "hd:p:s:";  // : 表示后面跟一个参数,该参数由optarg返回  ::表示可跟可不跟,如果有，必须紧跟在选项后
   static const struct option long_opts[] = {
-      {"help", no_argument, nullptr, 'h'},
+      {"help", no_argument, nullptr, 'h'},  //  name (长参数名),
+                                            //  has_arg (no_argument,表示不跟参数值, required_argument,表示一定要参数值， optional_argument表示可跟可不跟）
+                                            //  flag  (如果为nullptr，则返回val；如果不是,则将val赋予flag指向的内存)
+                                            //  val  (返回值)
       {"dag_conf", required_argument, nullptr, 'd'},
       {"process_name", required_argument, nullptr, 'p'},
       {"sched_name", required_argument, nullptr, 's'},
@@ -86,6 +95,7 @@ void ModuleArgument::GetOptions(const int argc, char* const argv[]) {
   }
 
   do {
+    //   字符串由optarg返回
     int opt =
         getopt_long(argc, argv, short_opts.c_str(), long_opts, &long_index);
     if (opt == -1) {

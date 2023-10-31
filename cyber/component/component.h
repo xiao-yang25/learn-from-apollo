@@ -141,7 +141,7 @@ class Component<M0, M1, M2, NullType> : public ComponentBase {
 template <typename M0>
 bool Component<M0, NullType, NullType, NullType>::Process(
     const std::shared_ptr<M0>& msg) {
-  if (is_shutdown_.load()) {
+  if (is_shutdown_.load()) { //获取原子变量当前值
     return true;
   }
   return Proc(msg);
@@ -176,7 +176,7 @@ bool Component<M0, NullType, NullType, NullType>::Initialize(
 
   bool is_reality_mode = GlobalData::Instance()->IsRealityMode();
 
-  ReaderConfig reader_cfg;
+  ReaderConfig reader_cfg; //用proto中的config去配置Readerconfig
   reader_cfg.channel_name = config.readers(0).channel();
   reader_cfg.qos_profile.CopyFrom(config.readers(0).qos_profile());
   reader_cfg.pending_queue_size = config.readers(0).pending_queue_size();
@@ -184,7 +184,7 @@ bool Component<M0, NullType, NullType, NullType>::Initialize(
   std::weak_ptr<Component<M0>> self =
       std::dynamic_pointer_cast<Component<M0>>(shared_from_this());
   auto func = [self](const std::shared_ptr<M0>& msg) {
-    auto ptr = self.lock();
+    auto ptr = self.lock();  //获取self的共享指针
     if (ptr) {
       ptr->Process(msg);
     } else {
@@ -194,7 +194,7 @@ bool Component<M0, NullType, NullType, NullType>::Initialize(
 
   std::shared_ptr<Reader<M0>> reader = nullptr;
 
-  if (cyber_likely(is_reality_mode)) {
+  if (cyber_likely(is_reality_mode)) { //编译期优化
     reader = node_->CreateReader<M0>(reader_cfg);
   } else {
     reader = node_->CreateReader<M0>(reader_cfg, func);

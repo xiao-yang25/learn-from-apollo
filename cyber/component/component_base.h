@@ -48,7 +48,7 @@ class ComponentBase : public std::enable_shared_from_this<ComponentBase> {
   virtual bool Initialize(const ComponentConfig& config) { return false; }
   virtual bool Initialize(const TimerComponentConfig& config) { return false; }
   virtual void Shutdown() {
-    if (is_shutdown_.exchange(true)) {
+    if (is_shutdown_.exchange(true)) {// ayomic 调用exchange函数修改is_shutdown的值，返回修改前的值
       return;
     }
 
