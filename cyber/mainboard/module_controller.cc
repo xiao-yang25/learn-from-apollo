@@ -34,6 +34,7 @@ void ModuleController::Clear() {
   class_loader_manager_.UnloadAllLibrary();
 }
 
+//  将所有DAG文件或目录的路径放到一个vector里，并逐一调用LoadModule
 bool ModuleController::LoadAll() {
   const std::string work_root = common::WorkRoot();
   const std::string current_path = common::GetCurrentPath();
@@ -71,6 +72,7 @@ bool ModuleController::LoadAll() {
   return true;
 }
 
+//
 bool ModuleController::LoadModule(const DagConfig& dag_config) {
   const std::string work_root = common::WorkRoot();
 
@@ -87,9 +89,11 @@ bool ModuleController::LoadModule(const DagConfig& dag_config) {
       AERROR << "Path does not exist: " << load_path;
       return false;
     }
-
+    
+    //  加载库
     class_loader_manager_.LoadLibrary(load_path);
-
+    
+    //  创建类对象，初始化后放入componet_list_  动态加载
     for (auto& component : module_config.components()) {
       const std::string& class_name = component.class_name();
       std::shared_ptr<ComponentBase> base =
