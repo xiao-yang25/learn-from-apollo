@@ -88,7 +88,7 @@ std::shared_ptr<Base> ClassLoader::CreateClassObj(
 
   std::lock_guard<std::mutex> lck(classobj_ref_count_mutex_);
   classobj_ref_count_ = classobj_ref_count_ + 1;
-  std::shared_ptr<Base> classObjSharePtr(
+  std::shared_ptr<Base> classObjSharePtr(  //  指定类的析构函数
       class_object, std::bind(&ClassLoader::OnClassObjDeleter<Base>, this,
                               std::placeholders::_1));
   return classObjSharePtr;
