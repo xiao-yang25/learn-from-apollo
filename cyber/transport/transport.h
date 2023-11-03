@@ -140,19 +140,20 @@ auto Transport::CreateReceiver(
   }
 
   switch (mode) {
+    //  指针传递
     case OptionalMode::INTRA:
       receiver =
           std::make_shared<IntraReceiver<M>>(modified_attr, msg_listener);
       break;
-
+    //  通过共享内存传递
     case OptionalMode::SHM:
       receiver = std::make_shared<ShmReceiver<M>>(modified_attr, msg_listener);
       break;
-
+    //  通过DDS
     case OptionalMode::RTPS:
       receiver = std::make_shared<RtpsReceiver<M>>(modified_attr, msg_listener);
       break;
-
+    //  根据消息类型自己选择通信方式，进程内消息传递通过指针，进程间通信通过共享内存，多机通信通过DDS
     default:
       receiver = std::make_shared<HybridReceiver<M>>(
           modified_attr, msg_listener, participant());

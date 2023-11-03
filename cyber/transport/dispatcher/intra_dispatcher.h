@@ -295,6 +295,7 @@ void IntraDispatcher::OnMessage(uint64_t channel_id,
     auto handler =
         std::dynamic_pointer_cast<ListenerHandler<MessageT>>(*handler_base);
     if (handler) {
+      //  关键代码
       handler->Run(message, message_info);
     } else {
       auto msg_size = message::FullByteSize(*message);

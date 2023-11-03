@@ -68,6 +68,7 @@ Transmitter<M>::Transmitter(const RoleAttributes& attr)
 template <typename M>
 Transmitter<M>::~Transmitter() {}
 
+//  消息发布
 template <typename M>
 bool Transmitter<M>::Transmit(const MessagePtr& msg) {
   msg_info_.set_seq_num(NextSeqNum());
