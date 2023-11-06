@@ -47,6 +47,7 @@ namespace transport {
 
 using apollo::cyber::proto::OptionalMode;
 
+// 简单工厂类
 class Transport {
  public:
   virtual ~Transport();
@@ -140,20 +141,25 @@ auto Transport::CreateReceiver(
   }
 
   switch (mode) {
-    //  指针传递
+    //  进程内，指针传递,(方式：调用回调函数)
+    //  上层Writer---> IntraTransmitter--->IntraDispatcher--->（回调）IntraReceiver---> （回调）上层Reader
     case OptionalMode::INTRA:
       receiver =
           std::make_shared<IntraReceiver<M>>(modified_attr, msg_listener);
       break;
-    //  通过共享内存传递
+    //  进程间，通过共享内存传递
+    //  1、上层Writer---> Segment（共享内存）和Notifier（发送通知）
+    //  2、ShmDispatcher（有独立线程）---> (主动读取）Segment---> （回调）上层Reader。
     case OptionalMode::SHM:
       receiver = std::make_shared<ShmReceiver<M>>(modified_attr, msg_listener);
       break;
-    //  通过DDS
+    //  跨域、多机通信，通过DDS
     case OptionalMode::RTPS:
       receiver = std::make_shared<RtpsReceiver<M>>(modified_attr, msg_listener);
       break;
     //  根据消息类型自己选择通信方式，进程内消息传递通过指针，进程间通信通过共享内存，多机通信通过DDS
+    //  1、上层Writer---> RtpsTransmitter打包成protobuf---> fastrtps发送到网络。
+    //  2、fastrtps接收到网络报文---> （回调）RtpsDispatcher---> （回调）RtpsReceiver---> （回调）上层Reader。
     default:
       receiver = std::make_shared<HybridReceiver<M>>(
           modified_attr, msg_listener, participant());
