@@ -148,7 +148,7 @@ class Manager {
 
   void Notify(const ChangeMsg& msg);
   bool Publish(const ChangeMsg& msg);
-  void OnRemoteChange(const std::string& msg_str);
+  void OnRemoteChange(const std::string& msg_str);  //  Subscriber的回调函数,解析拓扑变更消息并调用Dispose()函数进行处理
   bool IsFromSameProcess(const ChangeMsg& msg);
 
   std::atomic<bool> is_shutdown_;

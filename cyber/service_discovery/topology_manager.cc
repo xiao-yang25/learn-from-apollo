@@ -64,6 +64,7 @@ void TopologyManager::RemoveChangeListener(const ChangeConnection& conn) {
   local_conn.Disconnect();
 }
 
+//  第二种是基于主动式的拓扑变更广播
 bool TopologyManager::Init() {
   if (init_.exchange(true)) {
     return true;
@@ -74,7 +75,7 @@ bool TopologyManager::Init() {
   service_manager_ = std::make_shared<ServiceManager>();
 
   CreateParticipant();
-
+  //  调用相应的初始化函数
   bool result =
       InitNodeManager() && InitChannelManager() && InitServiceManager();
   if (!result) {
@@ -91,7 +92,14 @@ bool TopologyManager::Init() {
 
   return true;
 }
-
+//  在初始化时，会调用它们的StartDiscovery()函数开始启动自动发现机制。
+//  接着通过StartDiscovery()中的CreateSubscriber()和CreatePublisher()函数创建相应的subscriber和publisher。
+//  这层拓扑监控是主动式的，即需要相应的地方主动调用Join()或Leave()来触发，然后各子管理器中回调函数进行信息的更新。
+//  如NodeChannelImpl创建时会调用NodeManager::Join()。
+//  Reader和Writer初始化时会调用JoinTheTopolicy()函数，继而调用ChannelManager::Join()函数。
+//  相应地，有LeaveTheTopology()函数表示退出拓扑网络。在这两个函数中，会调用Dispose()函数，而这个函数是虚函数，在各子管理器中有各自的实现。
+//  另外Manager提供AddChangeListener()函数注册当拓扑发生变化时的回调函数。
+//  举例来说，Reader::JoinTheTopology()函数中会通过该函数注册回调Reader::OnChannelChange()。
 bool TopologyManager::InitNodeManager() {
   return node_manager_->StartDiscovery(participant_->fastrtps_participant());
 }
@@ -104,10 +112,20 @@ bool TopologyManager::InitServiceManager() {
   return service_manager_->StartDiscovery(participant_->fastrtps_participant());
 }
 
+//  Cyber RT中有两个层面的拓扑变化的监控
+//  第一种是基于Fast RTPS的发现机制
 bool TopologyManager::CreateParticipant() {
   std::string participant_name =
       common::GlobalData::Instance()->HostName() + '+' +
       std::to_string(common::GlobalData::Instance()->ProcessId());
+  //  它主要监视网络中是否有参与者加入或退出。
+  //  TopologyManager::CreateParticipant()函数创建transport::Participant对象时会输入包含host name与process id的名称。
+  //  ParticipantListener用于监听网络的变化。
+  //  网络拓扑发生变化时，Fast RTPS传上来ParticipantDiscoveryInfo，
+  //  在TopologyManager::Convert()函数中对该信息转换成Cyber RT中的数据结构ChangeMsg。
+  //  然后调用回调函数TopologyManager::OnParticipantChange()，
+  //  它会调用其它几个子管理器的OnTopoModuleLeave()函数。
+  //  然后子管理器中便可以将相应维护的信息进行更新（如NodeManager中将相应的节点删除）。
   participant_listener_ = new ParticipantListener(std::bind(
       &TopologyManager::OnParticipantChange, this, std::placeholders::_1));
   participant_ = std::make_shared<transport::Participant>(

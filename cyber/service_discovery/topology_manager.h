@@ -61,6 +61,8 @@ using ServiceManagerPtr = std::shared_ptr<ServiceManager>;
  * messages of those elements. Also, you can register you own `ChangeFunc` to
  * monitor topology change
  */
+//  节点，channel和service的管理
+//  节点是顶点， channel和service是边， 共同组成有向无环图
 class TopologyManager {
  public:
   using ChangeSignal = base::Signal<const ChangeMsg&>;
@@ -113,9 +115,9 @@ class TopologyManager {
   bool InitChannelManager();
   bool InitServiceManager();
 
-  bool CreateParticipant();
+  bool CreateParticipant();  //  创建transport::Participant对象, 输入包含host name与process id
   void OnParticipantChange(const PartInfo& info);
-  bool Convert(const PartInfo& info, ChangeMsg* change_msg);
+  bool Convert(const PartInfo& info, ChangeMsg* change_msg);  //  将ParticipantDiscoveryInfo转换成Cyber RT中的数据结构ChangeMsg
   bool ParseParticipantName(const std::string& participant_name,
                             std::string* host_name, int* process_id);
 
@@ -125,12 +127,12 @@ class TopologyManager {
   ServiceManagerPtr service_manager_;  /// shared ptr of ServiceManager
   /// rtps participant to publish and subscribe
   transport::ParticipantPtr participant_;
-  ParticipantListener* participant_listener_;
+  ParticipantListener* participant_listener_;  //  监听网络的变化， 网络拓扑发生变化时，Fast RTPS传上来ParticipantDiscoveryInfo
   ChangeSignal change_signal_;           /// topology changing signal,
                                          ///< connect to `ChangeFunc`s
   PartNameContainer participant_names_;  /// other participant in the topology
 
-  DECLARE_SINGLETON(TopologyManager)
+  DECLARE_SINGLETON(TopologyManager)  //  单例
 };
 
 }  // namespace service_discovery

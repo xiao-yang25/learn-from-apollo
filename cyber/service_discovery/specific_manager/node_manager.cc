@@ -27,6 +27,7 @@ namespace service_discovery {
 NodeManager::NodeManager() {
   allowed_role_ |= 1 << RoleType::ROLE_NODE;
   change_type_ = ChangeType::CHANGE_NODE;
+  //  通道名
   channel_name_ = "node_change_broadcast";
 }
 
