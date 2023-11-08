@@ -124,9 +124,11 @@ template <typename MessageT>
 bool Writer<MessageT>::Init() {
   {
     std::lock_guard<std::mutex> g(lock_);
+    //  1. 调用writerbase构建基本属性
     if (init_) {
       return true;
     }
+    //  2. 调用Transport的CreateTransmitter()函数
     transmitter_ =
         transport::Transport::Instance()->CreateTransmitter<MessageT>(
             role_attr_);
@@ -138,6 +140,7 @@ bool Writer<MessageT>::Init() {
   this->role_attr_.set_id(transmitter_->id().HashValue());
   channel_manager_ =
       service_discovery::TopologyManager::Instance()->channel_manager();
+  // 3. 加入到ChannelManager维护的拓扑信息中
   JoinTheTopology();
   return true;
 }
@@ -166,6 +169,7 @@ bool Writer<MessageT>::Write(const MessageT& msg) {
 template <typename MessageT>
 bool Writer<MessageT>::Write(const std::shared_ptr<MessageT>& msg_ptr) {
   RETURN_VAL_IF(!WriterBase::IsInit(), false);
+  //  调用transmit
   return transmitter_->Transmit(msg_ptr);
 }
 
@@ -180,6 +184,7 @@ void Writer<MessageT>::JoinTheTopology() {
   std::vector<proto::RoleAttributes> readers;
   channel_manager_->GetReadersOfChannel(channel_name, &readers);
   for (auto& reader : readers) {
+    //  enable相应的Transmitter
     transmitter_->Enable(reader);
   }
 

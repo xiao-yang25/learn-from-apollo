@@ -80,7 +80,7 @@ bool IntraTransmitter<M>::Transmit(const MessagePtr& msg,
     ADEBUG << "not enable.";
     return false;
   }
-
+  //  直接调用读端的OnMessage()
   dispatcher_->OnMessage(channel_id_, msg, msg_info);
   return true;
 }

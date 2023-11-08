@@ -39,7 +39,7 @@ struct WritableBlock {
   uint8_t* buf = nullptr;
 };
 using ReadableBlock = WritableBlock;
-
+//  表示一块对应一个channel的共享内存
 class Segment {
  public:
   explicit Segment(uint64_t channel_id);

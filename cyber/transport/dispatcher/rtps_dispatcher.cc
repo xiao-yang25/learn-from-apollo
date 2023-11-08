@@ -60,7 +60,9 @@ void RtpsDispatcher::AddSubscriber(const RoleAttributes& self_attr) {
   new_sub.sub_listener = std::make_shared<SubListener>(
       std::bind(&RtpsDispatcher::OnMessage, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
-
+  //  使用eprosima::fastrtps::Domain::createSubscriber()函数创建subscriber，
+  //  其回调统一为RtpsDispatcher::OnMessage()函数。
+  //  该函数会将从RTPS通路来的消息进行派发。
   new_sub.sub = eprosima::fastrtps::Domain::createSubscriber(
       participant_->fastrtps_participant(), sub_attr,
       new_sub.sub_listener.get());

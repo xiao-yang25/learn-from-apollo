@@ -67,7 +67,7 @@ class AllLatest : public DataFusion<M0, M1, M2, M3> {
           buffer_fusion_.Buffer()->Fill(data);
         });
   }
-
+  //  将多路channel的数据合并。DataFusion的实现类为AllLatest，取所有channel中的最新值
   bool Fusion(uint64_t* index, std::shared_ptr<M0>& m0, std::shared_ptr<M1>& m1,
               std::shared_ptr<M2>& m2, std::shared_ptr<M3>& m3) override {
     std::shared_ptr<FusionDataType> fusion_data;

@@ -181,7 +181,7 @@ class ReceiverManager {
  private:
   std::unordered_map<std::string,
                      typename std::shared_ptr<transport::Receiver<MessageT>>>
-      receiver_map_;
+      receiver_map_; //  channel name 和receiver的map
   std::mutex receiver_map_mutex_;
 
   DECLARE_SINGLETON(ReceiverManager<MessageT>)
@@ -205,6 +205,7 @@ auto ReceiverManager<MessageT>::GetReceiver(
   const std::string& channel_name = role_attr.channel_name();
   if (receiver_map_.count(channel_name) == 0) {
     receiver_map_[channel_name] =
+    //  调用Transport的CreateReceiver()函数
         transport::Transport::Instance()->CreateReceiver<MessageT>(
             role_attr, [](const std::shared_ptr<MessageT>& msg,
                           const transport::MessageInfo& msg_info,

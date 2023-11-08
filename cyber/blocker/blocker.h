@@ -60,6 +60,9 @@ struct BlockerAttr {
   std::string channel_name;
 };
 
+//  缓存者
+//  提供一个管理者获取数据的入口，方便调试、记录日志、运行模拟环境和监控整个系统，
+//  所以在 Blocker 类里注册的回调函数应该都是管理员注册的监控函数，和系统主逻辑没关系
 template <typename T>
 class Blocker : public BlockerBase {
   friend class BlockerManager;
@@ -80,11 +83,11 @@ class Blocker : public BlockerBase {
 
   void ClearObserved() override;
   void ClearPublished() override;
-  void Observe() override;
+  void Observe() override; //  将发布队列拷贝一份给观察队列
   bool IsObservedEmpty() const override;
   bool IsPublishedEmpty() const override;
 
-  bool Subscribe(const std::string& callback_id, const Callback& callback);
+  bool Subscribe(const std::string& callback_id, const Callback& callback); //  创建 published_callbacks_
   bool Unsubscribe(const std::string& callback_id) override;
 
   const MessageType& GetLatestObserved() const;
@@ -101,15 +104,15 @@ class Blocker : public BlockerBase {
 
  private:
   void Reset() override;
-  void Enqueue(const MessagePtr& msg);
-  void Notify(const MessagePtr& msg);
+  void Enqueue(const MessagePtr& msg); //  将消息推入到发布队列中
+  void Notify(const MessagePtr& msg); //  用 published_callbacks_ 内的所有的回调函数去处理消息
 
   BlockerAttr attr_;
-  MessageQueue observed_msg_queue_;
-  MessageQueue published_msg_queue_;
+  MessageQueue observed_msg_queue_;  //  观察队列
+  MessageQueue published_msg_queue_;  //  发布队列
   mutable std::mutex msg_mutex_;
 
-  CallbackMap published_callbacks_;
+  CallbackMap published_callbacks_; //   callback_id 和回调函数指针的一一对应关系表
   mutable std::mutex cb_mutex_;
 
   MessageType dummy_msg_;

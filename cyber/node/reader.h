@@ -259,6 +259,7 @@ bool Reader<MessageT>::Init() {
   if (init_.exchange(true)) {
     return true;
   }
+  // 1. 创建回调函数
   std::function<void(const std::shared_ptr<MessageT>&)> func;
   if (reader_func_ != nullptr) {
     func = [this](const std::shared_ptr<MessageT>& msg) {
@@ -268,11 +269,14 @@ bool Reader<MessageT>::Init() {
   } else {
     func = [this](const std::shared_ptr<MessageT>& msg) { this->Enqueue(msg); };
   }
+  // 2. 创建datavisitor和协程工厂, 并将func封装入协程
   auto sched = scheduler::Instance();
   croutine_name_ = role_attr_.node_name() + "_" + role_attr_.channel_name();
+  // 创建datavisitor  主要用于消息数据的访问。它存放到来的消息数据，并提供接口供消息读取
   auto dv = std::make_shared<data::DataVisitor<MessageT>>(
       role_attr_.channel_id(), pending_queue_size_);
   // Using factory to wrap templates.
+  //  创建协程工厂
   croutine::RoutineFactory factory =
       croutine::CreateRoutineFactory<MessageT>(std::move(func), dv);
   if (!sched->CreateTask(factory, croutine_name_)) {
@@ -280,9 +284,10 @@ bool Reader<MessageT>::Init() {
     init_.store(false);
     return false;
   }
-
+  //  3. 根据reader的属性， 从receivermanager处(实际上是从unordered_map中拿）拿到对应的receiver， 用于接收消息
   receiver_ = ReceiverManager<MessageT>::Instance()->GetReceiver(role_attr_);
   this->role_attr_.set_id(receiver_->id().HashValue());
+  // 4.从TopologyManager 拿到 channel_manager ，把这个 Reader 对象加入到拓扑结构中
   channel_manager_ =
       service_discovery::TopologyManager::Instance()->channel_manager();
   JoinTheTopology();

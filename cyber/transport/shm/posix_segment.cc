@@ -36,6 +36,9 @@ PosixSegment::PosixSegment(uint64_t channel_id) : Segment(channel_id) {
 
 PosixSegment::~PosixSegment() { Destroy(); }
 
+//  这块共享内存区域大体分两部分。一部分为元信息，另一部分为消息数据。后者会被切分为相同大小的block。
+//  block的buffer大小默认16K，但遇上消息超出大小的时候会调整。
+//  拿到该block后，将消息序列化后写入，并通知读者来取消息。
 bool PosixSegment::OpenOrCreate() {
   if (init_) {
     return true;

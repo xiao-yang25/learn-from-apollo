@@ -60,7 +60,7 @@ void IntraReceiver<M>::Enable() {
   if (this->enabled_) {
     return;
   }
-
+  //  向对应的Dispatcher注册其回调函数XXXReceiver::OnNewMessage()
   dispatcher_->AddListener<M>(
       this->attr_, std::bind(&IntraReceiver<M>::OnNewMessage, this,
                              std::placeholders::_1, std::placeholders::_2));

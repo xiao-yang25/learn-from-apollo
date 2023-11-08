@@ -28,6 +28,7 @@ namespace apollo {
 namespace cyber {
 namespace blocker {
 
+//  模拟模式的助手
 class BlockerManager {
  public:
   using BlockerMap =

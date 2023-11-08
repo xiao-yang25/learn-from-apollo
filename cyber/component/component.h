@@ -309,7 +309,9 @@ bool Component<M0, M1, NullType, NullType>::Initialize(
   for (auto& reader : readers_) {
     config_list.emplace_back(reader->ChannelId(), reader->PendingQueueSize());
   }
+  //  创建针对所有reader的datavisitor
   auto dv = std::make_shared<data::DataVisitor<M0, M1>>(config_list);
+  //  创建协程来进行数据处理
   croutine::RoutineFactory factory =
       croutine::CreateRoutineFactory<M0, M1>(func, dv);
   return sched->CreateTask(factory, node_->Name());

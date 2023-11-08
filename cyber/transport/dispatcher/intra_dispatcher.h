@@ -317,6 +317,7 @@ void IntraDispatcher::OnMessage(uint64_t channel_id,
   }
 }
 
+//  通过channel id 查找handler
 template <typename MessageT>
 std::shared_ptr<ListenerHandler<MessageT>> IntraDispatcher::GetHandler(
     uint64_t channel_id) {

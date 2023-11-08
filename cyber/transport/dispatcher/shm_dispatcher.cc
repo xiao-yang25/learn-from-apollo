@@ -98,7 +98,10 @@ void ShmDispatcher::OnMessage(uint64_t channel_id,
            << "'s handler.";
   }
 }
-
+//  初始化时会创建专门的线程，线程的执行体为ShmDispatcher::Threadfunc()函数。它在循环体内会通过Listen()函数等待新消息
+//  如果有新消息写入后发出通知，这儿就会往下走。基于通知中的ReadableInfo信息，得到channel id，block index等信息，
+//  然后调用ReadMessage()函数读消息并反序列化。
+//  之后调用ShmDispatcher::OnMessage()函数进行消息派发。
 void ShmDispatcher::ThreadFunc() {
   ReadableInfo readable_info;
   while (!is_shutdown_.load()) {

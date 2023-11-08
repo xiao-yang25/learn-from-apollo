@@ -106,6 +106,8 @@ bool ShmTransmitter<M>::Transmit(const M& msg, const MessageInfo& msg_info) {
 
   WritableBlock wb;
   std::size_t msg_size = message::ByteSize(msg);
+  //  AcquireBlockToWrite()函数拿一个可写的block。
+  //  如果发现该Segment尚未初始化，会调用OpenOrCreate()通过OS的接口创建共享内存并且map出虚拟地址。
   if (!segment_->AcquireBlockToWrite(msg_size, &wb)) {
     AERROR << "acquire block failed.";
     return false;

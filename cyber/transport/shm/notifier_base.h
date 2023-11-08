@@ -27,7 +27,9 @@ namespace transport {
 
 class NotifierBase;
 using NotifierPtr = NotifierBase*;
-
+//  通知机制是通过NotifierBase实现的。它有两个实现类，分别为ConditionNotifier和MulticastNotifier。
+//  前者为默认设置。它会单独开一块共享共享专门用于通知，其中包含了ReadableInfo等信息。
+//  MulticastNotifier的主要区别是它是通过指定的socket广播
 class NotifierBase {
  public:
   virtual ~NotifierBase() = default;

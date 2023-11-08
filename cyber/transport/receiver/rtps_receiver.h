@@ -39,7 +39,8 @@ class RtpsReceiver : public Receiver<M> {
   void Disable(const RoleAttributes& opposite_attr) override;
 
  private:
-  RtpsDispatcherPtr dispatcher_;
+  RtpsDispatcherPtr dispatcher_; //  指向单例RtpsDispatcher,用于派发RTPS发来的数据，
+                                 //  维护了channel id到subscriber的查找表  std::unordered_map<uint64_t, Subscriber> subs_;
 };
 
 template <typename M>

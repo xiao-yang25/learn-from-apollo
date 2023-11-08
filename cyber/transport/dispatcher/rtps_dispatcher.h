@@ -69,7 +69,7 @@ class RtpsDispatcher : public Dispatcher {
                  const std::shared_ptr<std::string>& msg_str,
                  const MessageInfo& msg_info);
   void AddSubscriber(const RoleAttributes& self_attr);
-  // key: channel_id
+  // key: channel_id    id->订阅者的查找表
   std::unordered_map<uint64_t, Subscriber> subs_;
   std::mutex subs_mutex_;
 

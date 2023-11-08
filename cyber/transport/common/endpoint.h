@@ -33,6 +33,7 @@ using EndpointPtr = std::shared_ptr<Endpoint>;
 
 using proto::RoleAttributes;
 
+//  代表一个通信的端点，主要的信息是身份标识与属性
 class Endpoint {
  public:
   explicit Endpoint(const RoleAttributes& attr);
@@ -44,6 +45,8 @@ class Endpoint {
  protected:
   bool enabled_;
   Identity id_;
+   //  包含了host name，process id和一个根据uuid产生的hash值作为id
+   //  通过它们就可以判断节点之间的相对位置关系了
   RoleAttributes attr_;
 };
 
